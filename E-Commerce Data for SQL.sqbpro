@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="E-Commerce Data for SQL.sqlite" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1768"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="customers" custom_title="0" dock_id="1" table="4,9:maincustomers"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000010100ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">SELECT
+COUNT (DISTINCT customer_id) AS Total_Customers,
+COUNT (DISTINCT order_id) AS Total_Orders
+FROM orders</sql><sql name="SQL 2*">SELECT
+strftime ('%Y-%m', o.order_purchase_timestamp) AS Month,
+SUM (p.payment_value) AS &quot;Total Revenue&quot;
+FROM orders AS o
+JOIN order_payments AS p
+ON o.order_id = p.order_id
+GROUP BY Month
+ORDER BY Month</sql><sql name="SQL 3*">SELECT
+customer_city, COUNT (DISTINCT customer_id) AS total_customers
+FROM customers
+GROUP BY customer_city
+ORDER BY total_customers DESC
+LIMIT 10;</sql><sql name="SQL 4*">SELECT
+customer_state, COUNT (DISTINCT customer_id) AS total_customers
+FROM customers
+GROUP BY customer_state
+ORDER BY total_customers DESC;</sql><sql name="SQL 5*">SELECT
+s.seller_id,
+SUM(op.payment_value) AS seller_revenue
+FROM sellers s
+JOIN order_items oi ON s.seller_id = oi.seller_id
+JOIN order_payments op ON oi.order_id = op.order_id
+GROUP BY s.seller_id
+ORDER BY seller_revenue DESC
+LIMIT 10;</sql><sql name="SQL 6*">SELECT
+s.seller_id,
+ROUND(AVG (julianday(o.order_delivered_customer_date)-julianday(o.order_purchase_timestamp)),2) AS avg_delivery_time
+FROM sellers s
+JOIN order_items oi ON s.seller_id = oi.seller_id
+JOIN orders o ON oi.order_id = o.order_id
+WHERE order_delivered_customer_date IS NOT NULL
+GROUP BY s.seller_id
+ORDER BY avg_delivery_time ASC
+LIMIT 10;</sql><sql name="SQL 7*">SELECT
+product_category_name_english,
+COUNT(oi.order_id) AS total_sold
+FROM product_category_name_translation pt
+JOIN products p ON pt.product_category_name = p.product_category_name
+JOIN order_items oi ON p.product_id = oi.product_id
+GROUP BY product_category_name_english
+ORDER BY total_sold DESC
+LIMIT 10;</sql><sql name="SQL 8*">SELECT
+product_category_name_english,
+ROUND(AVG(review_score),1) AS avg_review
+FROM product_category_name_translation pt
+JOIN products p ON pt.product_category_name = p.product_category_name
+JOIN order_items oi ON p.product_id = oi.product_id
+JOIN order_reviews ore ON oi.order_id = ore.order_id
+GROUP BY product_category_name_english
+ORDER BY avg_review DESC
+LIMIT 10;</sql><sql name="SQL 9*">SELECT CASE
+WHEN julianday(order_delivered_customer_date)  &lt;=  julianday (order_estimated_delivery_date)
+THEN 'On Time'
+ELSE 'Delayed'
+END AS delivery_status,
+COUNT (*) AS total_orders
+FROM orders
+WHERE order_delivered_customer_date IS NOT NULL
+GROUP BY delivery_status</sql><sql name="SQL 10*">SELECT
+seller_state,
+ROUND (AVG (julianday(order_delivered_customer_date)-julianday(order_purchase_timestamp)),2) AS avg_delivery_time
+FROM sellers s
+JOIN order_items oi ON s.seller_id = oi.seller_id
+JOIN orders o ON oi.order_id = o.order_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY seller_state
+ORDER BY avg_delivery_time ASC</sql><sql name="SQL 11*">SELECT
+ROUND (SUM(payment_value)/COUNT(DISTINCT order_id),2) AS avg_order_value
+FROM order_payments</sql><current_tab id="10"/></tab_sql></sqlb_project>
